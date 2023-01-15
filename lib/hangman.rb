@@ -1,4 +1,8 @@
 class Hangman
+  @@game = true
+  @guesses_array = []
+  @guesses = 6
+
   def self.clean_dict
     @dictionary = File.readlines($contents, chomp: true)
     p @dictionary.length
@@ -8,13 +12,17 @@ class Hangman
 
 
   def self.pick_word(contents)
-    @picked_word = @dictionary[rand(@dictionary.length)]
+    @picked_word = @rejected[rand(@rejected.length)]
   end
 
   def self.print_guesses_left
-    @guesses = 6
     p "You have #{@guesses} guesses left."
   end
+
+  def self.fail_state
+    game_loop
+  end
+
 
   def self.get_guess
     p @picked_word
@@ -22,26 +30,74 @@ class Hangman
     @guess = gets.chomp.gsub(/\W/, "")
     
     if @guess == nil
-      fail_state
-    elsif @guess.lenth > 1
-      fail_state
+      Hangman.fail_state
+    elsif @guess.length > 1
+      Hangman.fail_state
     end
+    
+    @guesses_array.push(@guess)
   end
 
-  def fail_state
+  
 
+  def self.first_printer
+    @hyphens = ''
+    for i in 1..@picked_word.length
+      @hyphens += '-'
+    end
+    p @hyphens
+  end
+
+ 
+
+  def self.guess_printer
+    @word_array = @picked_word.chars
+    @guess_printer = ''
+    @word_array.each do |i|
+      if @guesses_array.include?(i)
+        @guess_printer += i
+      else
+        @guess_printer += '-'
+      end
+    end
+    p @guess_printer
+      
   end
 
   def self.check_guess
-    word_array = @picked_word.chars
+    if @word_array.include?(@guess)
+    else
+      @guesses -= 1
+    end
+  end
+
+  def self.game_loop
+    while @guesses > 0
+      print_guesses_left
+      get_guess
+      guess_printer
+      check_guess
+      ender
+    end
+  end
+
+  def self.starter
+    clean_dict
+    pick_word(@dictionary)
+    first_printer
+  end
+
+  def self.ender
+    if @guesses <= 0
+      p "Sorry, you've lost. Try again?"
+    end
   end
 end
 
 
 
+
 $contents = File.open('/Users/clover/Documents/hangman1/google-10000-english-no-swears.txt', 'r')
 
-Hangman.clean_dict
-Hangman.pick_word(@dictionary)
-Hangman.print_guesses_left
-Hangman.check_guess
+Hangman.starter
+Hangman.game_loop
