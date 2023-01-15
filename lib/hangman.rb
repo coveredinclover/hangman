@@ -5,9 +5,7 @@ class Hangman
 
   def self.clean_dict
     @dictionary = File.readlines($contents, chomp: true)
-    p @dictionary.length
     @rejected = @dictionary.reject {|word| word.length < 5 || word.length > 12}
-    p @rejected.length
   end
 
 
@@ -16,16 +14,16 @@ class Hangman
   end
 
   def self.print_guesses_left
-    p "You have #{@guesses} guesses left."
+    p "You have #{@guesses} wrong guesses left."
   end
 
   def self.fail_state
+    p "Not a valid guess."
     game_loop
   end
 
 
   def self.get_guess
-    p @picked_word
     p "Please type in your guess."
     @guess = gets.chomp.gsub(/\W/, "")
     
@@ -85,13 +83,33 @@ class Hangman
     clean_dict
     pick_word(@dictionary)
     first_printer
+    game_loop
   end
 
   def self.ender
+    if @guess_printer == @picked_word
+      game_end
+    end
     if @guesses <= 0
-      p "Sorry, you've lost. Try again?"
+      p("Sorry, you've lost. Try again? Y or N")
+      try_again
     end
   end
+  def self.game_end
+    p "Congrats, you've won! Try again? Y or N"
+    try_again
+  end
+  def self.try_again
+    reaction = gets.chomp.downcase
+    if reaction == 'y'
+      starter
+    elsif reaction == 'n'
+      p 'Thanks for playing!'
+      exit
+    end
+  end
+
+
 end
 
 
@@ -100,4 +118,3 @@ end
 $contents = File.open('/Users/clover/Documents/hangman1/google-10000-english-no-swears.txt', 'r')
 
 Hangman.starter
-Hangman.game_loop
