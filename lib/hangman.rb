@@ -1,7 +1,26 @@
+require 'json'
+
 class Hangman
   @@game = true
   @guesses_array = []
   @guesses = 6
+
+  def self.welcomer
+     p "Welcome. Would you like to play a new game or a saved game? S or N"
+     save_or_new
+  end
+
+  def self.save_or_new
+    choice = gets.chomp.downcase
+    if choice == 's'
+      loader
+    elsif choice == 'n'
+      starter
+    else
+      p 'Not an option.'
+      save_or_new
+    end
+  end
 
   def self.clean_dict
     @dictionary = File.readlines($contents, chomp: true)
@@ -24,13 +43,17 @@ class Hangman
 
 
   def self.get_guess
-    p "Please type in your guess."
+    p "Please type in your guess, or 'save'."
     @guess = gets.chomp.gsub(/\W/, "")
     
     if @guess == nil
       Hangman.fail_state
+    elsif @guess == 'save'
+      saver
+      p 'Game saved!'  
     elsif @guess.length > 1
       Hangman.fail_state
+    
     end
     
     @guesses_array.push(@guess)
@@ -64,6 +87,7 @@ class Hangman
 
   def self.check_guess
     if @word_array.include?(@guess)
+    elsif @guess == 'save'
     else
       @guesses -= 1
     end
@@ -109,6 +133,26 @@ class Hangman
     end
   end
 
+  def self.jasoner
+    JSON.generate({guesses: @guesses, word: @picked_word, guesses_array: @guesses_array})
+  end
+
+  def self.saver
+    @save = jasoner
+    game_file = File.new('saved.json', 'w')
+    game_file.write(@save)
+    game_file.close
+  end
+
+  def self.loader
+    game_file = File.read('saved.json')
+    data = JSON.parse(game_file)
+    @guesses = data["guesses"]
+    @picked_word = data["word"]
+    @guesses_array = data["guesses_array"]
+    p data
+    game_loop
+  end
 
 end
 
@@ -116,5 +160,6 @@ end
 
 
 $contents = File.open('/Users/clover/Documents/hangman1/google-10000-english-no-swears.txt', 'r')
-
+Hangman.welcomer
 Hangman.starter
+
