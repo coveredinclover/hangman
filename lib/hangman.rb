@@ -51,6 +51,7 @@ class Hangman
     elsif @guess == 'save'
       saver
       p 'Game saved!'  
+      game_loop
     elsif @guess.length > 1
       Hangman.fail_state
     
@@ -126,10 +127,14 @@ class Hangman
   def self.try_again
     reaction = gets.chomp.downcase
     if reaction == 'y'
+      @guesses = 6
       starter
     elsif reaction == 'n'
       p 'Thanks for playing!'
       exit
+    else
+      p "Try again? Y or N"
+      try_again
     end
   end
 
@@ -150,7 +155,7 @@ class Hangman
     @guesses = data["guesses"]
     @picked_word = data["word"]
     @guesses_array = data["guesses_array"]
-    p data
+    guess_printer
     game_loop
   end
 
